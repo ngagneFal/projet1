@@ -1,0 +1,39 @@
+
+@app.route('/inscription')
+def kha():
+    curseur.execute("SELECT id_promo ,nom_promo FROM promotion WHERE date_deb>DATE( NOW() )")
+    promo=curseur.fetchall()
+    requete_liste_matricule = "SELECT max(id_ap) FROM apprenant2"
+    curseur.execute(requete_liste_matricule)
+    result_matricule = curseur.fetchall()
+    for mat in result_matricule:                
+        matricule=mat[0]
+    date_actu=datetime.datetime.today().strftime('%Y')
+
+    if matricule == None:
+        num=1
+        val='-'+str(num)+'-'
+        naf = "SA"+val+str(date_actu)
+    else:
+        num=matricule+1
+        val='-'+str(num)+'-'
+        naf="SA"+val+str(date_actu)
+    return render_template('inscription.html',n=promo,naf=naf)
+
+
+
+@app.route('/inscription', methods=['GET','POST'])
+def inscription():
+    if request.method == "POST":
+        details = request.form
+        matricule= details['matricule']
+        nom_ap = details['nom_ap']
+        prenom_ap = details['prenom_ap']
+        date_nais= details['date_nais']
+        add_ap= details['add_ap']
+        sexe_ap= details['sexe_ap']
+        requete_ajout_ap="INSERT INTO apprenant2(matricule,nom_ap,prenom_ap,date_nais,add_ap,sexe_ap) VALUES (  %s,%s, %s, %s,%s, %s)"
+        curseur.execute(requete_ajout_ap,(matricule,nom_ap,prenom_ap,date_nais,add_ap,sexe_ap))
+        connection.commit()
+    return render_template('inscription.html')
+        
